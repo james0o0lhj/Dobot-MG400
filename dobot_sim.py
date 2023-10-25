@@ -3,30 +3,29 @@ import time
 import pybullet_data
 import math
 
-# 初始化PyBullet模拟环境
+
 physicsClient = p.connect(p.GUI)  # or p.DIRECT for non-graphical version
 p.setAdditionalSearchPath(pybullet_data.getDataPath())  # optionally
-p.setGravity(0, 0, -9.81)  # 设置重力
+p.setGravity(0, 0, -9.81)  
 
-# 添加地板
-plane_id = p.loadURDF("plane.urdf")  # 默认的地板模型
 
-# 加载URDF模型
+plane_id = p.loadURDF("plane.urdf")  
+
+
 robotId = p.loadURDF(
     r"mg400\urdf\mg400_description.urdf",
     useFixedBase=True,
 )
 
-# 创建空列表
+
 position_control_group = []
+# joint index shown in the GUI
+position_control_group.append(p.addUserDebugParameter("J1", -math.pi, math.pi, 0)) # J1=j1
+position_control_group.append(p.addUserDebugParameter("J2", -math.pi, math.pi, 0)) # J2=j2_1
+position_control_group.append(p.addUserDebugParameter("J3", -math.pi, math.pi, 0)) # J3=j3_1
+position_control_group.append(p.addUserDebugParameter("J4", -math.pi, math.pi, 0)) # J4=j5
 
-position_control_group.append(p.addUserDebugParameter("j1", -math.pi, math.pi, 0))
-position_control_group.append(p.addUserDebugParameter("j2_1", -math.pi, math.pi, 0))
-position_control_group.append(p.addUserDebugParameter("j3_1", -math.pi, math.pi, 0))
-
-position_control_group.append(p.addUserDebugParameter("j5", -math.pi, math.pi, 0))
-
-
+# real joint index
 position_control_joint_name = [
     "j1",
     "j2_1",
@@ -41,7 +40,7 @@ position_control_joint_name = [
 while True:
     time.sleep(0.01)
     parameter = {}
-    # 将添加的参数“读”出来 
+   
     parameter[0] = p.readUserDebugParameter(position_control_group[0]) #j1
     parameter[1] = p.readUserDebugParameter(position_control_group[1]) #j2_1
     parameter[2] = p.readUserDebugParameter(position_control_group[2]) #j3_1
