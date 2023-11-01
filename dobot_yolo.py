@@ -56,16 +56,19 @@ while True:
     #     source="../Ring/test/video18.mpeg", show=False, stream=True, save=True
     # )
 
+    for result in results:
+        annotated_frame = result.plot()
+        boxes = result.boxes.numpy()
+        # Boxes object with attributes: boxes, cls, conf, data, id, is_track, orig_shape, shape, xywh, xywhn (normalize), xyxy, xyxyn
+        # boxes.data:   (x1, y1, x2, y2,   ID,   Conf,   cls)  for box in boxes: box.id box.cls box.xywh box.conf
 
-    depth_colormap = cv2.applyColorMap(
-        cv2.convertScaleAbs(depth_image, alpha=0.03), cv2.COLORMAP_JET
-    )
+        depth_colormap = cv2.applyColorMap(
+            cv2.convertScaleAbs(depth_image, alpha=0.03), cv2.COLORMAP_JET
+        )
+        images = np.hstack((annotated_frame, depth_colormap))
 
-    images = np.hstack((results, depth_colormap))
-
-    cv2.namedWindow("yolov8", cv2.WINDOW_NORMAL)
-    cv2.imshow("yolov8", images)
-
+        cv2.namedWindow("yolov8", cv2.WINDOW_NORMAL)
+        cv2.imshow("yolov8", images)
 
     if cv2.waitKey(1) == ord('q'):
         break
