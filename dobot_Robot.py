@@ -42,7 +42,7 @@ def get_feed(feed: DobotApi):
 
             # Refresh Properties
             current_actual = a["tool_vector_actual"][0]
-            print("tool_vector_actual:", current_actual)
+            #print("tool_vector_actual:", current_actual)
 
         sleep(0.001)
 
@@ -61,26 +61,42 @@ def wait_arrive(point_list):
 
         sleep(0.001)
 
-def dobot_init():
-    DobotApiDashboard.ResetRobot()
+def dobot_init(move: DobotApiMove,dashboard:DobotApi):
+    dashboard.ResetRobot()
     point_init = [300, 0, 0, 0]
     run_point(move, point_init) 
     wait_arrive(point_init)
-    print("dobot init done:) initial position",point_init)
+    print("dobot initial position",point_init)
+
+
+
 
 if __name__ == '__main__':
     dashboard, move, feed = connect_robot()
-    print("EnableRobot...")
-    dashboard.EnableRobot()
+
+    # print("EnableRobot...")
+    #dashboard.EnableRobot()
     print("Enabled:)")
-    feed_thread = threading.Thread(target=get_feed, args=(feed,))
-    feed_thread.setDaemon(True)
-    feed_thread.start()
-    print("running...")
-    point_a = [20, 280, -60, 200]
-    point_b = [160, 260, -30, 170]
-    while True:   
-        run_point(move, point_a)
-        wait_arrive(point_a)
-        run_point(move, point_b)
-        wait_arrive(point_b)
+
+    #dashboard.DisableRobot()
+    dashboard.ClearError()
+    #dashboard.GetErrorID()
+
+
+    
+
+    # feed_thread = threading.Thread(target=get_feed, args=(feed,))
+    # feed_thread.setDaemon(True)
+    # feed_thread.start()
+    # print("running...")
+
+
+    # point_a = [20, 280, -60, 0]
+    # point_b = [160, 260, -30, 0]  
+    # run_point(move, point_a)
+
+    # run_point(move, point_b)
+    # wait_arrive(point_b)
+    #dobot_init(move,dashboard)
+
+    
