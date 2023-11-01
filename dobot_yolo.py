@@ -12,26 +12,22 @@ from ultralytics import YOLO
 click_point_pix = ()
 camera = RealsenseD435()
 
-def mouseclick_callback(event, x, y, flags, param):
-    if event == cv2.EVENT_LBUTTONDOWN:
-        global camera, click_point_pix
-        click_point_pix = (x, y)
-
-        # Get click point in camera coordinates
-        click_z = depth_image[y][x] * camera.get_depth_scale()
-        click_x = np.multiply(x - intr_matrix[0][2], click_z / intr_matrix[0][0])
-        click_y = np.multiply(y - intr_matrix[1][2], click_z / intr_matrix[1][1])
-        if click_z == 0:
-            return
-        click_point = np.asarray([click_x, click_y, click_z])
-        click_point.shape = (3, 1)
-
-        image_to_arm = camera.image_to_arm()
-        target_position = np.dot(image_to_arm[0:3, 0:3], click_point) + image_to_arm[0:3, 3:]
-        target_position = target_position[0:3, 0]
-        print(target_position)
-        print(target_position.shape)
-        move.MovJ(target_position[0], target_position[1], target_position[2], 0)
+def move_target_position(x, y):
+    # pixel coordinate to image coordinate
+    image_z = depth_image[y][x] * camera.get_depth_scale()
+    image_x = np.multiply(x - intr_matrix[0][2], image_z / intr_matrix[0][0])
+    image_y = np.multiply(y - intr_matrix[1][2], image_z / intr_matrix[1][1])
+    if image_z == 0:
+        return
+    image_position = np.asarray([image_x, image_y, image_z])
+    image_position.shape = (3, 1)
+    # image coordinate to arm coordinate
+    image_to_arm = camera.image_to_arm()
+    target_position = np.dot(image_to_arm[0:3, 0:3], image_position) + image_to_arm[0:3, 3:]
+    target_position = target_position[0:3, 0]
+    print(target_position)
+    print(target_position.shape)
+    move.MovJ(target_position[0], target_position[1], target_position[2], 0)
 
 # Connect to the robot
 dashboard, move, feed = dobot_Robot.connect_robot()
@@ -44,10 +40,6 @@ feed_thread.start()
 print("running...")
 dobot_Robot.dobot_init(move, dashboard)
 
-# Show color and depth frames
-cv2.namedWindow('color')
-cv2.setMouseCallback('color', mouseclick_callback)
-cv2.namedWindow('depth')
 
 while True:
     # Capture RGB and depth images
