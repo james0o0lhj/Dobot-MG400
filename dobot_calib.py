@@ -95,6 +95,7 @@ if __name__ == "__main__":
     print("Image to arm transform:\n", image_to_arm)
     print("Arm to Image transform:\n", arm_to_image)
 
+
     print("Sanity Test:")
 
     print("-------------------")
@@ -113,5 +114,6 @@ if __name__ == "__main__":
         print("Result:", np.dot(arm_to_image, np.array(pt))[0:3])
 
     cv2.destroyAllWindows()
+    #pipeline.stop()
     #pipeline.stop()
     time.sleep(1)
