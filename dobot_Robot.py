@@ -80,7 +80,7 @@ if __name__ == '__main__':
 
     #dashboard.DisableRobot()
     dashboard.ClearError()
-    #dashboard.GetErrorID()
+    dashboard.DisableRobot()
 
 
     
