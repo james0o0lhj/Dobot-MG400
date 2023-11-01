@@ -5,44 +5,10 @@ import numpy as np
 import cv2
 import cv2.aruco as aruco
 import dobot_Robot
-
-
-# camera config
-pipeline = rs.pipeline()
-config = rs.config()
-config.enable_stream(rs.stream.depth, 640, 480, rs.format.z16, 30)
-config.enable_stream(rs.stream.color, 640, 480, rs.format.bgr8, 30)
-profile = pipeline.start(config)
-align_to = rs.stream.color
-align = rs.align(align_to)
-
-# get image
-def get_aligned_images( ):
-    frames = pipeline.wait_for_frames()
-    aligned_frames = align.process(frames)
-    aligned_depth_frame = aligned_frames.get_depth_frame()
-    color_frame = aligned_frames.get_color_frame()
-
-    # intelrealsense intrinsics
-    intr = color_frame.profile.as_video_stream_profile().intrinsics
-    # to ndarray for opencv 
-    intr_matrix = np.array([
-        [intr.fx, 0, intr.ppx], [0, intr.fy, intr.ppy], [0, 0, 1]
-    ])
-    # depth image-16 bit
-    depth_image = np.asanyarray(aligned_depth_frame.get_data())
-    # depth image-8 bit
-    depth_image_8bit = cv2.convertScaleAbs(depth_image, alpha=0.03)
-    pos = np.where(depth_image_8bit == 0)
-    depth_image_8bit[pos] = 255
-    # rgb
-    color_image = np.asanyarray(color_frame.get_data())
-    # return: rgb，depth，intrinsics ,intrinsics_matrix, Camera distortion(intr.coeffs), aligned_depth_frame
-    return color_image, depth_image,intr, intr_matrix, np.array(intr.coeffs),aligned_depth_frame
-
+import camera_realsenseD435 as camera
 
 def center_aruco():
-    rgb, depth, intr,intr_matrix, intr_coeffs,aligned_depth_frame = get_aligned_images()
+    rgb, depth, intr,intr_matrix, intr_coeffs,aligned_depth_frame = camera.get_aligned_images()
     # aruco
     aruco_dict = aruco.Dictionary_get(aruco.DICT_ARUCO_ORIGINAL)
     # create detector parameters
@@ -114,11 +80,18 @@ if __name__ == "__main__":
 
     image_to_arm = np.dot(arm_cord, np.linalg.pinv(centers))
     arm_to_image = np.linalg.pinv(image_to_arm)
+
+    with open("image_to_arm.txt", "w") as image_file:
+        image_file.write(image_to_arm)
+    with open("arm_to_image.txt", "w") as arm_file:
+        arm_file.write(arm_to_image)
+        
     dobot_Robot.dobot_init()
 
     print("Finished")
     print("Image to arm transform:\n", image_to_arm)
     print("Arm to Image transform:\n", arm_to_image)
+
     print("Sanity Test:")
 
     print("-------------------")
@@ -137,6 +110,6 @@ if __name__ == "__main__":
         print("Result:", np.dot(arm_to_image, np.array(pt))[0:3])
 
     cv2.destroyAllWindows()
-    pipeline.stop()
+    #pipeline.stop()
     time.sleep(1)
     dashboard.DisableRobot()
